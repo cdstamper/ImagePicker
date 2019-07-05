@@ -7,9 +7,12 @@ protocol CameraViewDelegate: class {
   func setFlashButtonHidden(_ hidden: Bool)
   func imageToLibrary()
   func cameraNotAvailable()
+  func cameraGotImageWithoutLibraryPermission(image:UIImage) //Change made by Sagi - May 12th 2019
 }
 
 class CameraView: UIViewController, CLLocationManagerDelegate, CameraManDelegate {
+    
+    
 
   var configuration = Configuration()
 
@@ -320,4 +323,9 @@ class CameraView: UIViewController, CLLocationManagerDelegate, CameraManDelegate
   func cameraManDidStart(_ cameraMan: CameraMan) {
     setupPreviewLayer()
   }
+    
+    //Change made by Sagi - May 12th 2019
+    func cameraImageWithCameraPermissionOnly(_ cameraMan: CameraMan, image: UIImage) {
+        self.delegate?.cameraGotImageWithoutLibraryPermission(image: image)
+    }
 }

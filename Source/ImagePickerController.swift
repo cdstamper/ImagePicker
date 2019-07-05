@@ -7,6 +7,7 @@ import Photos
   func wrapperDidPress(_ imagePicker: ImagePickerController, images: [UIImage])
   func doneButtonDidPress(_ imagePicker: ImagePickerController, images: [UIImage])
   func cancelButtonDidPress(_ imagePicker: ImagePickerController)
+    func capturedWithoutLibraryPermission(_ imagePicker: ImagePickerController, image:UIImage)
 }
 
 open class ImagePickerController: UIViewController {
@@ -173,12 +174,12 @@ open class ImagePickerController: UIViewController {
     let currentStatus = PHPhotoLibrary.authorizationStatus()
     guard currentStatus != .authorized else { return }
 
-    if currentStatus == .notDetermined { hideViews() }
+    //if currentStatus == .notDetermined { hideViews() } //Change made by Sagi - May 12th 2019
 
     PHPhotoLibrary.requestAuthorization { (authorizationStatus) -> Void in
       DispatchQueue.main.async {
         if authorizationStatus == .denied {
-          self.presentAskPermissionAlert()
+          //self.presentAskPermissionAlert() //Change made by Sagi - May 12th 2019
         } else if authorizationStatus == .authorized {
           self.permissionGranted()
         }
@@ -196,7 +197,10 @@ open class ImagePickerController: UIViewController {
     }
 
     let cancelAction = UIAlertAction(title: configuration.cancelButtonTitle, style: .cancel) { _ in
-      self.dismiss(animated: true, completion: nil)
+      //self.dismiss(animated: true, completion: nil)
+        
+        //Change made by Sagi - May 12th 2019
+        self.delegate?.cancelButtonDidPress(self)
     }
 
     alertController.addAction(alertAction)
@@ -404,6 +408,11 @@ extension ImagePickerController: CameraViewDelegate {
       topView.flashButton.isHidden = hidden
     }
   }
+    
+    //Change made by Sagi - May 12th 2019
+    func cameraGotImageWithoutLibraryPermission(image: UIImage) {
+        self.delegate?.capturedWithoutLibraryPermission(self, image: image)
+    }
 
   func imageToLibrary() {
     guard let collectionSize = galleryView.collectionSize else { return }

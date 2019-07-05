@@ -6,6 +6,7 @@ protocol CameraManDelegate: class {
   func cameraManNotAvailable(_ cameraMan: CameraMan)
   func cameraManDidStart(_ cameraMan: CameraMan)
   func cameraMan(_ cameraMan: CameraMan, didChangeInput input: AVCaptureDeviceInput)
+  func cameraImageWithCameraPermissionOnly(_ cameraMan: CameraMan, image: UIImage) //Change made by Sagi - May 12th 2019
 }
 
 class CameraMan {
@@ -172,15 +173,27 @@ class CameraMan {
   }
 
   func savePhoto(_ image: UIImage, location: CLLocation?, completion: (() -> Void)? = nil) {
-    PHPhotoLibrary.shared().performChanges({
-      let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
-      request.creationDate = Date()
-      request.location = location
-      }, completionHandler: { (_, _) in
-        DispatchQueue.main.async {
-          completion?()
-        }
-    })
+    
+    //Change made by Sagi - May 12th 2019
+    let currentStatus = PHPhotoLibrary.authorizationStatus()
+    if currentStatus != .authorized {
+        self.delegate?.cameraImageWithCameraPermissionOnly(self, image: image)
+    }
+    else {
+        
+        PHPhotoLibrary.shared().performChanges({
+            let request = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            request.creationDate = Date()
+            request.location = location
+        }, completionHandler: { (_, _) in
+            DispatchQueue.main.async {
+                completion?()
+            }
+        })
+        
+    }
+    
+    
   }
 
   func flash(_ mode: AVCaptureDevice.FlashMode) {
